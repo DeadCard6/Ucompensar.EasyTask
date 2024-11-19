@@ -34,4 +34,6 @@ public class Note {
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Group group;
+
+
 }

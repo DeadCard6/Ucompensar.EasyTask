@@ -1,6 +1,5 @@
 package dev.Proyect.Ucompensar.EasyTask.Controller;
 
-
 import dev.Proyect.Ucompensar.EasyTask.Model.User;
 import dev.Proyect.Ucompensar.EasyTask.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ public class userController {
             User newUser = userService.registerUser(user);
             return ResponseEntity.ok(newUser);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al registrar el usuario.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al registrar el usuario: " + e.getMessage());
         }
     }
 
@@ -37,9 +36,13 @@ public class userController {
 
         Optional<User> user = userService.login(phoneNumber, password);
         if (user.isPresent()) {
-            return ResponseEntity.ok(user);
+            // Devuelve un mensaje de éxito en formato JSON
+            return ResponseEntity.ok(Map.of("message", "Inicio de sesión exitoso"));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Número de teléfono o contraseña incorrectos.");
+            // Devuelve un mensaje de error en formato JSON
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Número de teléfono o contraseña incorrectos."));
         }
     }
+
 }
