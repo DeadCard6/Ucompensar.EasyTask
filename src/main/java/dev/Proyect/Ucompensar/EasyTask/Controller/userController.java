@@ -36,8 +36,11 @@ public class userController {
 
         Optional<User> user = userService.login(phoneNumber, password);
         if (user.isPresent()) {
-            // Devuelve un mensaje de éxito en formato JSON
-            return ResponseEntity.ok(Map.of("message", "Inicio de sesión exitoso"));
+            // Aquí puedes incluir el ID de usuario en la respuesta
+            return ResponseEntity.ok(Map.of(
+                    "message", "Inicio de sesión exitoso",
+                    "userId", user.get().getId() // Asegúrate de tener un getter para el ID
+            ));
         } else {
             // Devuelve un mensaje de error en formato JSON
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

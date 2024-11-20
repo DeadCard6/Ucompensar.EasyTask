@@ -7,17 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "Notes")
-
 public class Note {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,14 +24,15 @@ public class Note {
     private String hour;
     private String image;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 
     @ManyToOne
-    @JoinColumn(name = "group_id",nullable = true)
+    @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
+    // Usamos @JsonBackReference aquí para evitar el bucle de serialización
     @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "user_id")

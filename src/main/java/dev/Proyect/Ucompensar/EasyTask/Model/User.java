@@ -37,6 +37,7 @@ public class User {
     )
     private List<Group> groups = new ArrayList<>();
 
+    // Usamos @JsonManagedReference aquí para manejar la serialización correctamente
     @JsonManagedReference
     @OneToMany(mappedBy = "user")
     private List<Note> notes;

@@ -1,16 +1,15 @@
 package dev.Proyect.Ucompensar.EasyTask.Controller;
 
-import dev.Proyect.Ucompensar.EasyTask.Model.Group;
-import dev.Proyect.Ucompensar.EasyTask.Model.Note;
-import dev.Proyect.Ucompensar.EasyTask.Model.Role;
-import dev.Proyect.Ucompensar.EasyTask.Model.User;
+import dev.Proyect.Ucompensar.EasyTask.Model.*;
 import dev.Proyect.Ucompensar.EasyTask.Repository.GroupRepository;
+import dev.Proyect.Ucompensar.EasyTask.Repository.LocationRepository;
 import dev.Proyect.Ucompensar.EasyTask.Repository.NoteRepository;
 import dev.Proyect.Ucompensar.EasyTask.Repository.UserRepository;
 import dev.Proyect.Ucompensar.EasyTask.Service.GroupService;
 import dev.Proyect.Ucompensar.EasyTask.Service.NoteService;
 import dev.Proyect.Ucompensar.EasyTask.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,23 +42,48 @@ public class noteController {
     @Autowired
     private UserRepository userRepository;
 
-
-    // Crear una nueva nota
-    @PostMapping
-    public ResponseEntity<Note> createNote(@RequestBody Note note) {
-
-        if (note.getUser() == null || userService.findById(note.getUser().getId()).isEmpty()) {
-            return ResponseEntity.badRequest().body(null); // Si el usuario no es válido
-        }
+    @Autowired
+    private LocationRepository locationRepository;
 
 
-        if (note.getGroup() != null && groupService.findById(note.getGroup().getId()) == null) {
+    @PostMapping("/user/{userId}")
+    public ResponseEntity<Note> createNote(@PathVariable Long userId, @RequestBody Note note) {
+        // Verificar si el usuario existe
+        var user = userService.findById(userId);
+        if (user.isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
 
+        note.setUser(user.get());
+
+        // Manejar Location
+        if (note.getLocation() != null) {
+            Location location = note.getLocation();
+
+            if (location.getId() == null) {
+                // Nueva ubicación
+                location = locationRepository.save(location);
+            } else {
+                // Ubicación existente
+                Optional<Location> existingLocation = locationRepository.findById(location.getId());
+                if (existingLocation.isPresent()) {
+                    location = existingLocation.get();
+                } else {
+                    location = locationRepository.save(location);
+                }
+            }
+
+
+            note.setLocation(location);
+        }
+
+        // Guardar la nota
         Note savedNote = noteService.saveNote(note);
+
         return ResponseEntity.ok(savedNote);
     }
+
+
 
     // Obtener todas las notas o filtrarlas por usuario o grupo
     @GetMapping
@@ -86,14 +110,22 @@ public class noteController {
     }
 
     // Obtener una nota por su ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Note> getNoteById(@PathVariable Long id) {
-        Note note = noteService.findById(id);
-        if (note == null) {
-            return ResponseEntity.notFound().build();
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Note>> getNotesByUser(@PathVariable Long userId) {
+        try {
+            List<Note> notes = noteService.findByUserId(userId);
+
+            if (notes == null || notes.isEmpty()) {
+                return ResponseEntity.noContent().build();  // 204 No Content si no hay notas
+            }
+
+            return ResponseEntity.ok(notes);  // 200 OK con las notas del usuario
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);  // 500 Internal Server Error en caso de excepción
         }
-        return ResponseEntity.ok(note);
     }
+
 
     // Actualizar una nota existente
     @PutMapping("/{id}")
