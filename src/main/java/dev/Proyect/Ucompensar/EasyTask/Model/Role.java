@@ -20,6 +20,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long Id;
 
-    private String canEdit;
-    private String onlyView;
+    @Enumerated(EnumType.STRING)
+    private Permission permission;
+
+    public enum Permission {
+        CAN_EDIT,
+        ONLY_VIEW
+    }
 }

@@ -23,6 +23,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // Permitir acceso a Swagger
                         .requestMatchers("/api/**").permitAll() // Permitir acceso a todas las rutas de API sin autenticación
                         .anyRequest().permitAll() // Cualquier otra solicitud requiere autenticación
                 )

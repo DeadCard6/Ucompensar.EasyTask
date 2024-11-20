@@ -1,5 +1,6 @@
 package dev.Proyect.Ucompensar.EasyTask.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,8 +33,11 @@ public class Note {
     private Location location;
 
     @ManyToOne
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "group_id",nullable = true)
     private Group group;
 
-
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
